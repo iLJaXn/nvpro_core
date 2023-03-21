@@ -143,4 +143,23 @@ if (TARGET dxh)
   LIST(APPEND THIRDPARTY_LIBRARIES dxh)
 endif()
 
+# libInterpolate
+if (NOT TARGET libInterpolate::Interpolate AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/libInterpolate)
+  add_subdirectory(libInterpolate)
+endif()
+if (TARGET libInterpolate::Interpolate)
+  LIST(APPEND THIRDPARTY_LIBRARIES libInterpolate::Interpolate)
+endif()
+
+# nanovdb
+if (NOT TARGET nanovdb AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/nanovdb)
+  add_library(nanovdb INTERFACE)
+  set(NANOVDB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/nanovdb)
+  target_sources(nanovdb INTERFACE ${NANOVDB_DIR}/nanovdb.h)
+  target_include_directories(nanovdb INTERFACE ${NANOVDB_DIR})
+endif()
+if (TARGET nanovdb)
+  LIST(APPEND THIRDPARTY_LIBRARIES nanovdb)
+endif()
+
 set(THIRDPARTY_LIBRARIES "${THIRDPARTY_LIBRARIES}" PARENT_SCOPE)

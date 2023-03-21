@@ -51,3 +51,6 @@
 	path = third_party/dxh
 	url = https://github.com/microsoft/DirectX-Headers.git
 	shallow = true
+[submodule "third_party/libInterpolate"]
+	path = third_party/libInterpolate
+	url = git@github.com:CD3/libInterpolate.git
