@@ -249,3 +249,8 @@ _set_target_output(nvpro_core)
 
 message(STATUS "nvpro_core library name: ${library_name}")
 
+set(USE_NEW_NVPRO_CORE ON)
+if(USE_NEW_NVPRO_CORE)
+  set(USE_NEW_NVPRO_CORE ${USE_NEW_NVPRO_CORE} PARENT_SCOPE)
+  message(STATUS "This is a new version nvpro_core")
+endif()
