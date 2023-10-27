@@ -39,6 +39,7 @@
 #include "nvvk/context_vk.hpp"
 
 #include "shaders/dh_hdr.h"
+#include "nvh/timesampler.hpp"
 
 namespace nvvkhl {
 // Forward declaration
@@ -80,6 +81,8 @@ void HdrEnv::destroy()
 //
 void HdrEnv::loadEnvironment(const std::string& hrdImage)
 {
+  nvh::ScopedTimer st(__FUNCTION__);
+
   m_valid = false;
 
   if(!hrdImage.empty())
@@ -118,25 +121,23 @@ void HdrEnv::loadEnvironment(const std::string& hrdImage)
       VkQueue queue = nullptr;
       vkGetDeviceQueue(m_device, m_familyIndex, 0, &queue);
 
-      auto t_start = std::chrono::high_resolution_clock::now();
       {
-        nvvk::ScopeCommandBuffer cmd_buf(m_device, m_familyIndex, queue);
+        nvh::ScopedTimer st("Generating Acceleration structure");
+        {
+          nvvk::ScopeCommandBuffer cmd_buf(m_device, m_familyIndex, queue);
 
-        // Creating the importance sampling for the HDR and storing the info in the m_accelImpSmpl buffer
-        auto env_accel = createEnvironmentAccel(pixels, img_size.width, img_size.height, m_average, m_integral);
-        m_accelImpSmpl = m_alloc->createBuffer(cmd_buf, env_accel, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-        m_debug.setObjectName(m_accelImpSmpl.buffer, "HDR_accel");
+          // Creating the importance sampling for the HDR and storing the info in the m_accelImpSmpl buffer
+          auto env_accel = createEnvironmentAccel(pixels, img_size.width, img_size.height, m_average, m_integral);
+          m_accelImpSmpl = m_alloc->createBuffer(cmd_buf, env_accel, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+          m_debug.setObjectName(m_accelImpSmpl.buffer, "HDR_accel");
 
-        nvvk::Image           image   = m_alloc->createImage(cmd_buf, buffer_size, pixels, ic_info);
-        VkImageViewCreateInfo iv_info = nvvk::makeImageViewCreateInfo(image.image, ic_info);
-        m_texHdr                      = m_alloc->createTexture(image, iv_info, sampler_create_info);
-        m_debug.setObjectName(m_texHdr.image, "HDR");
+          nvvk::Image           image   = m_alloc->createImage(cmd_buf, buffer_size, pixels, ic_info);
+          VkImageViewCreateInfo iv_info = nvvk::makeImageViewCreateInfo(image.image, ic_info);
+          m_texHdr                      = m_alloc->createTexture(image, iv_info, sampler_create_info);
+          m_debug.setObjectName(m_texHdr.image, "HDR");
+        }
+        m_alloc->finalizeAndReleaseStaging();
       }
-      m_alloc->finalizeAndReleaseStaging();
-
-      auto t_end  = std::chrono::high_resolution_clock::now();
-      auto t_diff = std::chrono::duration<double, std::milli>(t_end - t_start).count();
-      LOGI(" - Generating Acceleration structure: %f ms \n", t_diff);
 
       stbi_image_free(pixels);
 

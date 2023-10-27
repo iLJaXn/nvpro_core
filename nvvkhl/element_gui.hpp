@@ -47,7 +47,7 @@ public:
   {
     static bool close_app{false};
     bool        v_sync = m_app->isVsync();
-#ifdef _DEBUG
+#ifndef NDEBUG
     static bool show_demo{false};
 #endif
     if(ImGui::BeginMenu("File"))
@@ -61,9 +61,9 @@ public:
     if(ImGui::BeginMenu("Tools"))
     {
       ImGui::MenuItem("V-Sync", "Ctrl+Shift+V", &v_sync);
-#ifdef _DEBUG
+#ifndef NDEBUG
       ImGui::MenuItem("Show Demo", nullptr, &show_demo);
-#endif  // _DEBUG
+#endif  // !NDEBUG
       ImGui::EndMenu();
     }
 
@@ -82,12 +82,12 @@ public:
     {
       m_app->close();
     }
-#ifdef _DEBUG
+#ifndef NDEBUG
     if(show_demo)
     {
       ImGui::ShowDemoWindow(&show_demo);
     }
-#endif  // DEBUG
+#endif  // !NDEBUG
 
     if(m_app->isVsync() != v_sync)
     {
@@ -116,10 +116,12 @@ public:
     {
       const auto&           size = m_app->getViewportSize();
       std::array<char, 256> buf{};
-      int                   ret = snprintf(buf.data(), buf.size(), "%s %dx%d | %d FPS / %.3fms", PROJECT_NAME,
-                         static_cast<int>(size.width), static_cast<int>(size.height),
-                         static_cast<int>(ImGui::GetIO().Framerate), 1000.F / ImGui::GetIO().Framerate);
-      glfwSetWindowTitle(m_app->getWindowHandle(), buf.data());
+      if(snprintf(buf.data(), buf.size(), "%s %dx%d | %d FPS / %.3fms", PROJECT_NAME, static_cast<int>(size.width),
+                  static_cast<int>(size.height), static_cast<int>(ImGui::GetIO().Framerate), 1000.F / ImGui::GetIO().Framerate)
+         > 0)
+      {
+        glfwSetWindowTitle(m_app->getWindowHandle(), buf.data());
+      }
       m_dirtyTimer = 0;
     }
   }

@@ -30,16 +30,16 @@ using vec3 = nvmath::vec3f;
 
 struct InstanceInfo
 {
-  mat4 objMatrix;    // object to world
-  mat4 objMatrixIT;  // object to world invert-transform
+  mat4 objectToWorld;
+  mat4 worldToObject;
   int  materialID;
 };
 
 struct Vertex
 {
-  vec4 position;
-  vec4 normal;
-  vec4 tangent;
+  vec4 position;  // POS.xyz + UV.x
+  vec4 normal;    // NRM.xyz + UV.y
+  vec4 tangent;   // TNG.xyz + sign: 1, -1
 };
 
 struct PrimMeshInfo
@@ -55,6 +55,14 @@ struct SceneDescription
   uint64_t instInfoAddress;
   uint64_t primInfoAddress;
 };
+
+// shadingModel
+#define MATERIAL_METALLICROUGHNESS 0
+#define MATERIAL_SPECULARGLOSSINESS 1
+// alphaMode
+#define ALPHA_OPAQUE 0
+#define ALPHA_MASK 1
+#define ALPHA_BLEND 2
 
 struct GltfShadeMaterial
 {
@@ -79,6 +87,22 @@ struct GltfShadeMaterial
   int   emissiveTexture;
   int   alphaMode;
   float alphaCutoff;
+
+  // KHR_materials_transmission
+  float transmissionFactor;
+  int   transmissionTexture;
+  // KHR_materials_ior
+  float ior;
+  // KHR_materials_volume
+  vec3  attenuationColor;
+  float thicknessFactor;
+  int   thicknessTexture;
+  float attenuationDistance;
+  // KHR_materials_clearcoat
+  float clearcoatFactor;
+  float clearcoatRoughness;
+  int   clearcoatTexture;
+  int   clearcoatRoughnessTexture;
 };
 
 #endif

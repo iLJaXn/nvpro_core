@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2022-2023, NVIDIA CORPORATION.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * SPDX-FileCopyrightText: Copyright (c) 2014-2022 NVIDIA CORPORATION
+ * SPDX-FileCopyrightText: Copyright (c) 2022-2023 NVIDIA CORPORATION
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -76,7 +76,7 @@ nvvk::RaytracingBuilderKHR::BlasInput nvvkhl::SceneRtx::primitiveToGeometry(cons
   triangles.vertexStride             = sizeof(Vertex);
   triangles.indexType                = VK_INDEX_TYPE_UINT32;
   triangles.indexData.deviceAddress  = indexAddress;
-  triangles.maxVertex                = prim.vertexCount;
+  triangles.maxVertex                = prim.vertexCount - 1;
   //triangles.transformData; // Identity
 
   // Identify the above data as containing opaque triangles.
@@ -101,7 +101,7 @@ nvvk::RaytracingBuilderKHR::BlasInput nvvkhl::SceneRtx::primitiveToGeometry(cons
 
 void nvvkhl::SceneRtx::createBottomLevelAS(const nvh::GltfScene& scn, const SceneVk& scnVk, VkBuildAccelerationStructureFlagsKHR flags)
 {
-  nvh::ScopedTimer _st("- Create BLAS");
+  nvh::ScopedTimer st(std::string(__FUNCTION__) + "\n");
 
   // BLAS - Storing each primitive in a geometry
   std::vector<nvvk::RaytracingBuilderKHR::BlasInput> all_blas;
@@ -125,13 +125,13 @@ void nvvkhl::SceneRtx::createBottomLevelAS(const nvh::GltfScene& scn, const Scen
 
 void nvvkhl::SceneRtx::createTopLevelAS(const nvh::GltfScene& scn, VkBuildAccelerationStructureFlagsKHR flags)
 {
-  nvh::ScopedTimer _st("- Create TLAS");
+  nvh::ScopedTimer st(__FUNCTION__);
 
   std::vector<VkAccelerationStructureInstanceKHR> tlas;
   tlas.reserve(scn.m_nodes.size());
   for(const auto& node : scn.m_nodes)
   {
-    VkGeometryInstanceFlagsKHR flags{VK_GEOMETRY_INSTANCE_TRIANGLE_CULL_DISABLE_BIT_NV};
+    VkGeometryInstanceFlagsKHR flags{};
     const nvh::GltfPrimMesh&   prim_mesh = scn.m_primMeshes[node.primMesh];
     const nvh::GltfMaterial&   mat       = scn.m_materials[prim_mesh.materialIndex];
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * SPDX-FileCopyrightText: Copyright (c) 2014-2022 NVIDIA CORPORATION
+ * SPDX-FileCopyrightText: Copyright (c) 2014-2023 NVIDIA CORPORATION
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -44,6 +44,9 @@ public:
   VkFormat              getDepthFormat() const { return m_depthFormat; }
   float getAspectRatio() { return static_cast<float>(m_imageSize.width) / static_cast<float>(m_imageSize.height); }
 
+  // Create a buffer from the VkImage, useful for saving to disk
+  nvvk::Buffer createImageToBuffer(VkCommandBuffer cmd, uint32_t i = 0) const;
+
 private:
   struct Resources
   {
@@ -51,6 +54,7 @@ private:
     nvvk::Image                        gBufferDepth;                // Depth buffer
     VkImageView                        depthView = VK_NULL_HANDLE;  // Image view of the depth buffer
     std::vector<VkDescriptorImageInfo> descriptor;                  // Holds the sampler and image view
+    VkSampler                          linearSampler = VK_NULL_HANDLE;
   };
 
   Resources                    m_res;

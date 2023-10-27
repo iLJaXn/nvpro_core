@@ -124,6 +124,8 @@ endif()
 
 if(USING_IMGUI)
   set(IMGUI_SOURCE 
+      imgui/imgui_axis.cpp  
+      imgui/imgui_axis.hpp
       imgui/imgui_camera_widget.cpp 
       imgui/imgui_camera_widget.h 
       imgui/imgui_helper.cpp
@@ -224,11 +226,12 @@ add_library(nvpro_core STATIC
 )
 
 # Create precompiled header (added in CMake 3.16)
-if((${CMAKE_VERSION} VERSION_GREATER "3.16.0") OR (${CMAKE_VERSION} VERSION_EQUAL "3.16.0"))
-  target_precompile_headers(nvpro_core PRIVATE
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+  set(_PCH_FILES
     "<algorithm>"
-    ${VULKAN_HEADERS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/nvh/nvprint.hpp
   )
+  target_precompile_headers(nvpro_core PRIVATE ${_PCH_FILES})
 endif()
 
 # Add X11 for screenshot support on linux
@@ -237,10 +240,21 @@ if(UNIX)
   LIST(APPEND PLATFORM_LIBRARIES ${X11_LIBRARIES})
 endif()
 
+# Make Windows compilation somewhat faster
+if(WIN32)
+  target_compile_definitions(nvpro_core PRIVATE WIN32_LEAN_AND_MEAN)
+endif()
+
+if(USING_IMGUI)
+  # Enable ImVec* operators for all nvpro_core. See imgui.h.
+  target_compile_definitions(nvpro_core PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
+endif()
+
 target_link_libraries(nvpro_core
   ${PLATFORM_LIBRARIES} 
   glfw 
   imgui
+  fmt
   ${THIRDPARTY_LIBRARIES}
  )
 

@@ -2,9 +2,9 @@
 // This needs to be used along with a Platform Backend (e.g. GLFW, SDL, Win32, custom..)
 
 // Implemented features:
+//  [x] Renderer: User texture binding. Use 'VkDescriptorSet' as ImTextureID. Read the FAQ about ImTextureID! See https://github.com/ocornut/imgui/pull/914 for discussions.
 //  [X] Renderer: Large meshes support (64k+ vertices) with 16-bit indices.
 //  [x] Renderer: Multi-viewport / platform windows. With issues (flickering when creating a new viewport).
-//  [!] Renderer: User texture binding. Use 'VkDescriptorSet' as ImTextureID. Read the FAQ about ImTextureID! See https://github.com/ocornut/imgui/pull/914 for discussions.
 
 // Important: on 32-bit systems, user texture binding is only supported if your imconfig file has '#define ImTextureID ImU64'.
 // See imgui_impl_vulkan.cpp file for details.
@@ -43,7 +43,7 @@
 #if defined(IMGUI_IMPL_VULKAN_NO_PROTOTYPES) && !defined(VK_NO_PROTOTYPES)
 #define VK_NO_PROTOTYPES
 #endif
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 // Initialization data, for ImGui_ImplVulkan_Init()
 // [Please zero-clear before use!]
